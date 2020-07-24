@@ -31,10 +31,10 @@ namespace TakeStock
             //    rabbitser.PushToMqtt("dasdasda1321");
             //}
 
-            //var readerComponent = new ReaderComponent();
-            //readerComponent.Usbconnect();
-            //readerComponent.GeteAntennaNo(4);
-            //readerComponent.StartReadEpc(false);
+            var readerComponent = new ReaderComponent();
+            readerComponent.Usbconnect();
+            readerComponent.GeteAntennaNo(4);
+            readerComponent.StartReadEpc(false);
             Console.ReadLine();
         }
     }
