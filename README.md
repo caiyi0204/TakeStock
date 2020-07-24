@@ -1,2 +1,0 @@
-# RfidReader
-RfidReader（HongLu）
