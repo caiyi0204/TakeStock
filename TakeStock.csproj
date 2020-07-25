@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsynchronousMessage.cs" />
+    <Compile Include="Dtos\CommondOutPut.cs" />
     <Compile Include="Dtos\MachineStatusOutPut.cs" />
     <Compile Include="Dtos\RabbitConnectDto.cs" />
     <Compile Include="Dtos\TakeUpServiceOutPut.cs" />

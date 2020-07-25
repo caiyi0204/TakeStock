@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -7,6 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using TakeStock.Dtos;
+using TakeStock.Static;
 
 namespace TakeStock.ServiceInterf.Impl
 {
@@ -90,6 +93,23 @@ namespace TakeStock.ServiceInterf.Impl
             }
         }
 
+        /// <summary>
+        /// 启动读写器
+        /// </summary>
+        private void readerComponentStart()
+        {
+            this.readerComponent.Usbconnect();
+            this.readerComponent.GeteAntennaNo(4);
+            this.readerComponent.StartReadEpc();
+        }
+        /// <summary>
+        /// 关闭读写器
+        /// </summary>
+        private void readerComponentClose()
+        {
+            this.readerComponent.StopReadEpc();
+            this.readerComponent.CloseNowConnect();
+        }
         private Task ProcessRequest(HttpListenerContext context)
         {
             if (context.Request.HttpMethod.ToUpperInvariant() != "GET")
@@ -105,29 +125,66 @@ namespace TakeStock.ServiceInterf.Impl
             //switch (urlPath)
             switch (actionName)
             {
-                case "/":
-                    if (!context.Request.Url.ToString().EndsWith("/"))
+                case "/":return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg= StaticMsg.NoCom }), "application/json; charset=UTF-8");
+                case "/allstart" :
+                    string allstartMsg = StaticMsg.Success;
+                    bool allstartBool = true;
+                    try
                     {
-
-                        string Commond = context.Request.QueryString["Commond"];
-                        Console.WriteLine(Commond);
-
-                        //context.Response.Redirect(context.Request.Url + "/");
-                        context.Response.Close();
-                        return Task.FromResult(0);
+                        if (!StaticEntity.MachineWork) {
+                            this.readerComponentStart();
+                        }
+                        StaticEntity.MachineWork = true;
+                        StaticEntity.MqttPushWork = true;
                     }
-                    else
+                    catch {
+                        allstartMsg = StaticMsg.ComponentFailed;
+                        allstartBool = false;
+                    }
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = allstartBool, Msg = allstartMsg }), "application/json; charset=UTF-8");
+
+                case "/allstop":
+                    string allstopMsg = StaticMsg.Success;
+                    bool allstopBool = true;
+                    try
                     {
-                        // request.ContentType = "application/json; charset=UTF-8";
-                        return WriteString(context, "Hello World!", "application/json; charset=UTF-8");
-                        //return WriteString(context, "Hello World!", "text/plain");
+                        if (StaticEntity.MachineWork)
+                        {
+                            this.readerComponentClose();
+                        }
+                        StaticEntity.MachineWork = false;
+                        StaticEntity.MqttPushWork = false;
                     }
-                case "/favicon.ico":
-                    return WriteFavIcon(context);
-                case "/ping":
-                    return WritePong(context);
-                //case "/pay":
-                //    return OnPayResult(context);
+                    catch
+                    {
+                        allstopMsg = StaticMsg.ComponentCloseFailed;
+                        allstopBool = false;
+                    }
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = allstopBool, Msg = allstopMsg }), "application/json; charset=UTF-8");
+
+                case "/pushstart": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "pushstart" }), "application/json; charset=UTF-8");
+                case "/pushstop": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "pushstop" }), "application/json; charset=UTF-8");
+                case "/start": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "start" }), "application/json; charset=UTF-8");
+                case "/stop": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "stop" }), "application/json; charset=UTF-8");
+
+                //return WriteString(context, ResStr, "application/json; charset=UTF-8");
+
+                //if (!context.Request.Url.ToString().EndsWith("/"))
+                //{
+                //    string Commond = context.Request.QueryString["Commond"];
+                //    Console.WriteLine(Commond);
+                //    context.Response.Redirect(context.Request.Url + "/");
+                //    context.Response.Close();
+                //    return Task.FromResult(0);
+                //}
+                //else
+                //{
+                //    return WriteString(context, "Hello World!", "application/json; charset=UTF-8");
+                //    //return WriteString(context, "Hello World!", "text/plain");
+                //}
+                case "/favicon.ico":return WriteFavIcon(context);
+                case "/ping": return WritePong(context);
+                //case "/pay": return OnPayResult(context);
             }
             return WriteNotFound(context);
         }
