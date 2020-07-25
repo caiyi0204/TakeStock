@@ -44,7 +44,7 @@ namespace TakeStock.ServiceInterf.Impl
         /// <returns></returns>
         public bool PushToMqtt(string Rfid)
         {
-            if (!StaticEntity.IsWork) {
+            if (!StaticEntity.MqttPushWork) {
                 return false;
             }
             TakeUpServiceOutPut takeUpServiceOutPut = new TakeUpServiceOutPut() {

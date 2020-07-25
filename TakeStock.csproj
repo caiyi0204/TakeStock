@@ -99,12 +99,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsynchronousMessage.cs" />
+    <Compile Include="Dtos\MachineStatusOutPut.cs" />
     <Compile Include="Dtos\RabbitConnectDto.cs" />
     <Compile Include="Dtos\TakeUpServiceOutPut.cs" />
     <Compile Include="InitAutofac.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReaderComponent.cs" />
+    <Compile Include="ServiceInterf\IHttpService.cs" />
+    <Compile Include="ServiceInterf\Impl\HttpService.cs" />
     <Compile Include="ServiceInterf\Impl\RabbitService.cs" />
     <Compile Include="ServiceInterf\IRabbitService.cs" />
     <Compile Include="Static\CommandEnum.cs" />

@@ -10,7 +10,8 @@ namespace TakeStock.Static
     public static class StaticEntity
     {
         public static ConcurrentDictionary<string, DateTime> Pool { set; get; }=new ConcurrentDictionary<string, DateTime>();
-        public static bool IsWork { set; get; } = false;
+        public static bool MachineWork { set; get; } = false;
+        public static bool MqttPushWork { set; get; } = false;
     }
 
 }

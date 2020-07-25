@@ -22,6 +22,7 @@ namespace TakeStock
             rabbitConnectDto.UserName = ConfigurationManager.AppSettings["UserName"].ToString();
             rabbitConnectDto.Password = ConfigurationManager.AppSettings["Password"].ToString();
 
+            string ListenerUriPrefix = ConfigurationManager.AppSettings["ListenerUriPrefix"].ToString();
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.HostName = rabbitConnectDto.HostName;
@@ -45,10 +46,14 @@ namespace TakeStock
             }
 
             _Builder = new ContainerBuilder();
+
+            _Builder.Register<ReaderComponent>(c => new ReaderComponent()).SingleInstance();
+
             _Builder.Register<RabbitConnectDto>(c=> rabbitConnectDto).SingleInstance();
             _Builder.Register<IConnection>(c => connection).SingleInstance();
             _Builder.Register<IModel>(c => PoolChannel).SingleInstance();
             _Builder.RegisterType<RabbitService>().As<IRabbitService>().SingleInstance().PropertiesAutowired();
+            _Builder.Register<HttpService>(c=>new HttpService(ListenerUriPrefix)).As<IHttpService>().SingleInstance().PropertiesAutowired();
             _container = _Builder.Build();
         }
         static IContainer Container
