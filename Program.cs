@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TakeStock.ServiceInterf;
 using TakeStock.Static;
+using Topshelf;
 
 namespace TakeStock
 {
@@ -14,11 +15,32 @@ namespace TakeStock
     {
         static void Main(string[] args)
         {
-            InitAutofac.InitAutofacs();
-            var rabbitser = InitAutofac.GetFromFac<IRabbitService>();
-            var httpService = InitAutofac.GetFromFac<IHttpService>();
 
-            httpService.Start();
+            try
+            {
+                string description = "汉脑盘点机器人服务";
+                string displayName = "HNTakeStock";
+                string serviceName = "HNTakeStock";
+
+                HostFactory.Run(x =>
+                {
+                    x.Service<Service>(s =>
+                    {
+                        s.ConstructUsing(name => new Service());
+                        s.WhenStarted(tc => tc.Start());
+                        s.WhenStopped(tc => tc.Stop());
+                    });
+
+                    x.RunAsLocalSystem();
+                    x.SetDescription(description); 
+                    x.SetDisplayName(displayName);
+                    x.SetServiceName(serviceName);
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             //rabbitser.ListenReceive(
             //    delegate (string command)
@@ -47,4 +69,22 @@ namespace TakeStock
             Console.ReadLine();
         }
     }
+
+    public class Service
+    {
+        public IHttpService _httpService;
+        public Service() {
+            InitAutofac.InitAutofacs();
+            _httpService = InitAutofac.GetFromFac<IHttpService>();
+        }
+        public void Start()
+        {
+            _httpService.Start();
+        }
+        public void Stop()
+        {
+            _httpService.Dispose();
+        }
+    }
+
 }

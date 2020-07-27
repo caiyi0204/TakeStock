@@ -107,6 +107,7 @@ namespace TakeStock.ServiceInterf.Impl
         /// </summary>
         private void readerComponentClose()
         {
+            StaticEntity.Pool.Clear();
             this.readerComponent.StopReadEpc();
             this.readerComponent.CloseNowConnect();
         }
@@ -162,10 +163,46 @@ namespace TakeStock.ServiceInterf.Impl
                     }
                     return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = allstopBool, Msg = allstopMsg }), "application/json; charset=UTF-8");
 
-                case "/pushstart": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "pushstart" }), "application/json; charset=UTF-8");
-                case "/pushstop": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "pushstop" }), "application/json; charset=UTF-8");
-                case "/start": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "start" }), "application/json; charset=UTF-8");
-                case "/stop": return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg = "stop" }), "application/json; charset=UTF-8");
+                case "/pushstart":
+                    StaticEntity.MqttPushWork = true;
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = true, Msg = StaticMsg.Success }), "application/json; charset=UTF-8");
+                case "/pushstop":
+                    StaticEntity.MqttPushWork = false;
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = true, Msg = StaticMsg.Success }), "application/json; charset=UTF-8");
+                case "/start":
+                    string startMsg = StaticMsg.Success;
+                    bool startBool = true;
+                    try
+                    {
+                        if (!StaticEntity.MachineWork)
+                        {
+                            this.readerComponentStart();
+                        }
+                        StaticEntity.MachineWork = true;
+                    }
+                    catch
+                    {
+                        startMsg = StaticMsg.ComponentFailed;
+                        startBool = false;
+                    }
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = startBool, Msg = startMsg }), "application/json; charset=UTF-8");
+                case "/stop":
+                    string stopMsg = StaticMsg.Success;
+                    bool stopBool = true;
+                    try
+                    {
+                        if (StaticEntity.MachineWork)
+                        {
+                            this.readerComponentClose();
+                        }
+                        StaticEntity.MachineWork = false;
+                    }
+                    catch
+                    {
+                        stopMsg = StaticMsg.ComponentCloseFailed;
+                        stopBool = false;
+                    }
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = stopBool, Msg = stopMsg }), "application/json; charset=UTF-8");
 
                 //return WriteString(context, ResStr, "application/json; charset=UTF-8");
 
@@ -183,15 +220,18 @@ namespace TakeStock.ServiceInterf.Impl
                 //    //return WriteString(context, "Hello World!", "text/plain");
                 //}
                 case "/favicon.ico":return WriteFavIcon(context);
+                case "/status": return WriteString(context, JsonConvert.SerializeObject(new MachineStatusOutPut { MachineWork = StaticEntity.MachineWork, MqttPushWork= StaticEntity.MqttPushWork }), "application/json; charset=UTF-8"); ;
                 case "/ping": return WritePong(context);
+                default:
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg= StaticMsg.NoCom }), "application/json; charset=UTF-8");
                 //case "/pay": return OnPayResult(context);
             }
-            return WriteNotFound(context);
+            //return WriteNotFound(context);
         }
 
         private static Task WritePong(HttpListenerContext context)
         {
-            return WriteString(context, "pong", "text/plain");
+            return WriteString(context, "ok", "text/plain");
         }
 
         //private static async Task OnPayResult(HttpListenerContext context)
@@ -322,6 +362,19 @@ namespace TakeStock.ServiceInterf.Impl
 
         public void Dispose()
         {
+            if (StaticEntity.MachineWork)
+            {
+                try
+                {
+                    this.readerComponentClose();
+                }
+                catch { 
+
+                }
+            }
+            StaticEntity.MachineWork = false;
+            StaticEntity.MqttPushWork = false;
+
             this.Stop();
             this.httpListener.Close();
             using (this.cts) { }

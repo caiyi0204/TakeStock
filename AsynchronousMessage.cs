@@ -24,11 +24,15 @@ namespace TakeStock
 
         public void OutPutTags(Tag_Model tag)
         {
-            var addres = StaticEntity.Pool.TryAdd(tag.EPC,DateTime.Now);
-            if (addres) {
-                rabbitService.PushToMqtt(tag.EPC);
+            if (StaticEntity.MqttPushWork) {//开启Push
+                var addres = StaticEntity.Pool.TryAdd(tag.EPC, DateTime.Now);
+                if (addres)
+                {
+                    rabbitService.PushToMqtt(tag.EPC);
+                    Console.WriteLine(tag.ANT1_COUNT + "==>" + tag.ANT2_COUNT + "==>" + tag.RSSI + "==>" + tag.EPC);
+                }
             }
-            //Console.WriteLine(tag.ANT1_COUNT+"==>"+tag.ANT2_COUNT + "==>" + tag.RSSI+"==>"+tag.EPC);
+           
         }
 
         public void OutPutTagsOver()
