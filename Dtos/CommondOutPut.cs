@@ -8,7 +8,7 @@ namespace TakeStock.Dtos
 {
     public class CommondOutPut
     {
-        public bool IsSuccess { set; get; }
-        public string Msg { set; get; }
+        public bool success { set; get; }
+        public string msg { set; get; }
     }
 }

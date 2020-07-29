@@ -126,7 +126,7 @@ namespace TakeStock.ServiceInterf.Impl
             //switch (urlPath)
             switch (actionName)
             {
-                case "/":return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg= StaticMsg.NoCom }), "application/json; charset=UTF-8");
+                case "/":return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = false, msg= StaticMsg.NoCom }), "application/json; charset=UTF-8");
                 case "/allstart" :
                     string allstartMsg = StaticMsg.Success;
                     bool allstartBool = true;
@@ -142,7 +142,7 @@ namespace TakeStock.ServiceInterf.Impl
                         allstartMsg = StaticMsg.ComponentFailed;
                         allstartBool = false;
                     }
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = allstartBool, Msg = allstartMsg }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = allstartBool, msg = allstartMsg }), "application/json; charset=UTF-8");
 
                 case "/allstop":
                     string allstopMsg = StaticMsg.Success;
@@ -161,14 +161,14 @@ namespace TakeStock.ServiceInterf.Impl
                         allstopMsg = StaticMsg.ComponentCloseFailed;
                         allstopBool = false;
                     }
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = allstopBool, Msg = allstopMsg }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = allstopBool, msg = allstopMsg }), "application/json; charset=UTF-8");
 
                 case "/pushstart":
                     StaticEntity.MqttPushWork = true;
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = true, Msg = StaticMsg.Success }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = true, msg = StaticMsg.Success }), "application/json; charset=UTF-8");
                 case "/pushstop":
                     StaticEntity.MqttPushWork = false;
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = true, Msg = StaticMsg.Success }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = true, msg = StaticMsg.Success }), "application/json; charset=UTF-8");
                 case "/start":
                     string startMsg = StaticMsg.Success;
                     bool startBool = true;
@@ -185,7 +185,7 @@ namespace TakeStock.ServiceInterf.Impl
                         startMsg = StaticMsg.ComponentFailed;
                         startBool = false;
                     }
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = startBool, Msg = startMsg }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = startBool, msg = startMsg }), "application/json; charset=UTF-8");
                 case "/stop":
                     string stopMsg = StaticMsg.Success;
                     bool stopBool = true;
@@ -202,7 +202,7 @@ namespace TakeStock.ServiceInterf.Impl
                         stopMsg = StaticMsg.ComponentCloseFailed;
                         stopBool = false;
                     }
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = stopBool, Msg = stopMsg }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = stopBool, msg = stopMsg }), "application/json; charset=UTF-8");
 
                 //return WriteString(context, ResStr, "application/json; charset=UTF-8");
 
@@ -223,7 +223,7 @@ namespace TakeStock.ServiceInterf.Impl
                 case "/status": return WriteString(context, JsonConvert.SerializeObject(new MachineStatusOutPut { MachineWork = StaticEntity.MachineWork, MqttPushWork= StaticEntity.MqttPushWork }), "application/json; charset=UTF-8"); ;
                 case "/ping": return WritePong(context);
                 default:
-                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { IsSuccess = false, Msg= StaticMsg.NoCom }), "application/json; charset=UTF-8");
+                    return WriteString(context, JsonConvert.SerializeObject(new CommondOutPut { success = false, msg= StaticMsg.NoCom }), "application/json; charset=UTF-8");
                 //case "/pay": return OnPayResult(context);
             }
             //return WriteNotFound(context);
